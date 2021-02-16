@@ -50,3 +50,23 @@ def filt(y,dctFilter,thresh=1e-10,fwd=True,axis=(0,1),do_dct=True):
     DTDy[np.logical_and(DTDy>=-thresh,DTDy<=thresh)] = 0.
     return DTDy
 
+import numpy as np
+from scipy import sparse
+
+def compose_dtd(nx, ny):
+    ns = nx*ny                                                              
+    n = int(np.sqrt(ns))
+    d1 = 2 * np.ones(ns)
+    d1[ny-1::ny] = 1
+    d1[0::ny] = 1
+    d2 = np.ones(ns) * -1
+    d2[ny-1::ny] = 0
+    d3 = 2 * np.ones(ns)
+    d3[:ny] = 1
+    d3[ns-ny:] = 1
+    d4 = np.ones(ns) * -1
+    dtdx = sparse.spdiags([d1, d2[::-1], d2], [0, 1, -1], ns, ns)
+    dtdy = sparse.spdiags([d3, d4, d4], [0, ny, -ny], ns, ns)
+    dtd = dtdx + dtdy
+    return dtd, dtdx, dtdy
+
